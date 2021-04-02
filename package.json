@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/SKYCRATE-ltd/DNS/issues"
   },
-  "homepage": "https://github.com/SKYCRATE-ltd/DNS#readme"
+  "homepage": "https://github.com/SKYCRATE-ltd/DNS#readme",
+  "dependencies": {
+    "termite": "github:SKYCRATE-ltd/termite"
+  }
 }

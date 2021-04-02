@@ -1,55 +1,48 @@
 #!/bin/env node
 
-// TODO: update to use computer, zed, etc...
 import {
-	readFileSync,
-	writeFileSync
-} from "fs";
+	readlines,
+	write
+} from "computer";
+import Program from "termite";
+
+const RETURN = x => x;
+const NEWLINE = '\n';
+const SPACE = ' ';
+const FILE = '/etc/hosts';
+
+const render_gap = (s, o = "") => {
+	for (let i = 0; i < s; i++)
+		o += SPACE;
+	return o;
+};
+const render_line = (IP, hostnames) => IP + render_gap(20 - IP.length) + hostnames.join(SPACE);
+const render = hosts => hosts.map(([IP, hostnames]) => render_line(IP, hostnames)).join(NEWLINE);
+const read = file => readlines(file)
+						.map(line => {
+							let [IP, ...hostnames] = line.split(SPACE).filter(RETURN);
+							return [IP, hostnames];
+						});
+const save = hosts => write(FILE, render(hosts));
+
+const HOSTS_FILE = read(FILE);
 
 let [
 	IP,
 	CMD,
 	...hostnames
 ] = process.argv.slice(2);
-const RETURN = x => x;
-const NEWLINE = '\n';
-const SPACE = ' ';
-const COMMENT = '#';
-const FILE = '/etc/hosts';
-const encoding = "utf-8";
 
-const gap = (s, o = "") => {
-	for (let i = 0; i < s; i++)
-		o += SPACE;
-	return o;
-};
+if (!IP || !CMD)
+	CMD = "list";
 
-const parse = file =>
-				readFileSync(file, {encoding})
-				.split(NEWLINE)
-				.map(x => x.trim())
-				.filter(RETURN)
-				.filter(x => !x.startsWith(COMMENT))
-				.map(line => {
-					let [IP, ...hostnames] = line.split(SPACE).filter(RETURN);
-					return [IP, hostnames];
-				});
-
-const render_line = (IP, hostnames) => IP + gap(20 - IP.length) + hostnames.join(SPACE);
-const render = hosts => hosts.map(([IP, hostnames]) => render_line(IP, hostnames)).join(NEWLINE);
-
-const save = hosts =>
-	writeFileSync(FILE, render(hosts), {encoding});
-
-const HOSTS_FILE = parse(FILE);
-
-const CMDS = {
-	list: _ip => {
+Program({
+	list(_ip) {
 		return _ip ? HOSTS_FILE
 						.filter(([ip]) => _ip === ip)
 						.map(([ip, hostnames]) => hostnames.join(SPACE)).join(NEWLINE) : render(HOSTS_FILE);
 	},
-	add: (_ip, ...hostnames) => {
+	add(_ip, ...hostnames) {
 		let row = HOSTS_FILE.find(([ip]) => ip === _ip);
 		
 		if (!row) {
@@ -61,7 +54,7 @@ const CMDS = {
 		save(HOSTS_FILE);
 		return render(HOSTS_FILE);
 	},
-	remove: (_ip, ...hostnames) => {
+	remove(_ip, ...hostnames) {
 		const row = HOSTS_FILE.find(([ip]) => ip === _ip);
 		if (!row)
 			return `ERROR: ${_ip} is not present in hosts file.`
@@ -72,14 +65,9 @@ const CMDS = {
 		save(hosts);
 		return render(hosts);
 	},
-	clear: _ip => {
+	clear(_ip) {
 		const hosts = HOSTS_FILE.filter(([ip]) => _ip !== ip);
 		save(hosts);
 		return render(hosts);
 	}
-}
-
-if (!IP || !CMD)
-	CMD = "list";
-
-console.log(CMDS[CMD](IP, ...hostnames));
+})(CMD, IP, ...hostnames);
