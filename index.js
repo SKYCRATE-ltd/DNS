@@ -1,5 +1,3 @@
-#!/bin/env node
-
 import {
 	readlines,
 	write
@@ -27,16 +25,7 @@ const save = hosts => write(FILE, render(hosts));
 
 const HOSTS_FILE = read(FILE);
 
-let [
-	IP,
-	CMD,
-	...hostnames
-] = process.argv.slice(2);
-
-if (!IP || !CMD)
-	CMD = "list";
-
-Program({
+export default Program({
 	list(_ip) {
 		return _ip ? HOSTS_FILE
 						.filter(([ip]) => _ip === ip)
@@ -70,4 +59,4 @@ Program({
 		save(hosts);
 		return render(hosts);
 	}
-})(CMD, IP, ...hostnames);
+});
