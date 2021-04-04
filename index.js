@@ -21,13 +21,13 @@ const read = file => readlines(file)
 							let [IP, ...hostnames] = line.split(SPACE).filter(RETURN);
 							return [IP, hostnames];
 						});
-const save = hosts => write(FILE, render(hosts));
+const save = hosts => write(FILE, render(hosts) + NEWLINE);
 
 const HOSTS_FILE = read(FILE);
 
 export default Program({
 	list(_ip) {
-		return this.print(_ip ? HOSTS_FILE
+		return this.println(_ip ? HOSTS_FILE
 						.filter(([ip]) => _ip === ip)
 						.map(([ip, hostnames]) => hostnames.join(SPACE)).join(NEWLINE) : render(HOSTS_FILE));
 	},
@@ -41,7 +41,7 @@ export default Program({
 		row[1].push(...hostnames.filter(name => !row[1].includes(name)));
 
 		save(HOSTS_FILE);
-		return this.print(render(HOSTS_FILE));
+		return this.println(render(HOSTS_FILE));
 	},
 	remove(_ip, ...hostnames) {
 		const row = HOSTS_FILE.find(([ip]) => ip === _ip);
@@ -52,11 +52,11 @@ export default Program({
 
 		const hosts = row[1].length ? HOSTS_FILE : HOSTS_FILE.filter(([ip]) => ip !== _ip);
 		save(hosts);
-		return this.print(render(hosts));
+		return this.println(render(hosts));
 	},
 	clear(_ip) {
 		const hosts = HOSTS_FILE.filter(([ip]) => _ip !== ip);
 		save(hosts);
-		return this.print(render(hosts));
+		return this.println(render(hosts));
 	}
 });
