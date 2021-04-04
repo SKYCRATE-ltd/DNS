@@ -26,6 +26,9 @@ const save = hosts => write(FILE, render(hosts) + NEWLINE);
 const HOSTS_FILE = read(FILE);
 
 export default Program({
+	["@default"]() {
+		return this.pass('list');
+	},
 	list(_ip) {
 		return this.println(_ip ? HOSTS_FILE
 						.filter(([ip]) => _ip === ip)
