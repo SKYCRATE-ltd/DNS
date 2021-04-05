@@ -1,11 +1,15 @@
 #!/bin/bash
 
 # TODO: generate this file... termite should handle it!
-SCRIPT=/usr/local/bin/DNS
+if ! [ -d node_modules/ ]; then
+	npm i
+fi
+
+SCRIPT=${1:-/usr/local/bin}/DNS
 cat > $SCRIPT <<EOM
 #!/bin/bash
 
-node $(pwd)/DNS.js \$@
+$(pwd)/DNS.js \$@
 
 EOM
 chmod +x $SCRIPT
